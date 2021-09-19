@@ -40,9 +40,9 @@ namespace Microsoft.AspNetCore.SpaServices.VueCli
             var vueCliServerInfoTask = StartVueCliServerAsync(sourcePath, scriptName, pkgManagerCommand, logger);
             // Everything we proxy is hardcoded to target http://localhost because:
             // - the requests are always from the local machine (we're not accepting remote
-            //   requests that go directly to the Angular CLI middleware server)
+            //   requests that go directly to the Vue CLI middleware server)
             // - given that, there's no reason to use https, and we couldn't even if we
-            //   wanted to, because in general the Angular CLI server has no certificate
+            //   wanted to, because in general the Vue CLI server has no certificate
             var targetUriTask = vueCliServerInfoTask.ContinueWith(
                 task => new UriBuilder("http", "localhost", task.Result.Port).Uri);
 
@@ -52,7 +52,7 @@ namespace Microsoft.AspNetCore.SpaServices.VueCli
                 // the first request times out, subsequent requests could still work.
                 var timeout = spaBuilder.Options.StartupTimeout;
                 return targetUriTask.WithTimeout(timeout,
-                    $"The Angular CLI process did not start listening for requests " +
+                    $"The Vue CLI process did not start listening for requests " +
                     $"within the timeout period of {timeout.Seconds} seconds. " +
                     $"Check the log output for error information.");
             });
@@ -89,7 +89,7 @@ namespace Microsoft.AspNetCore.SpaServices.VueCli
             var uri = new Uri(openBrowserLine.Groups[1].Value);
             var serverInfo = new VueCliServerInfo { Port = uri.Port };
 
-            // Even after the Angular CLI claims to be listening for requests, there's a short
+            // Even after the Vue CLI claims to be listening for requests, there's a short
             // period where it will give an error if you make a request too quickly
             await WaitForVueCliServerToAcceptRequests(uri);
 
