@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.SpaServices.VueCli
            ISpaBuilder spaBuilder,
            string scriptName)
         {
-            var pkgManagerCommand = spaBuilder.Options.PackageManagerCommand;
+            //var pkgManagerCommand = spaBuilder.Options.PackageManagerCommand;
             var sourcePath = spaBuilder.Options.SourcePath;
             if (string.IsNullOrEmpty(sourcePath))
             {
@@ -37,7 +37,7 @@ namespace Microsoft.AspNetCore.SpaServices.VueCli
 
             var appBuilder = spaBuilder.ApplicationBuilder;
             var logger = LoggerFinder.GetOrCreateLogger(appBuilder, LogCategoryName);
-            var vueCliServerInfoTask = StartVueCliServerAsync(sourcePath, scriptName, pkgManagerCommand, logger);
+            var vueCliServerInfoTask = StartVueCliServerAsync(sourcePath, scriptName, logger);
             // Everything we proxy is hardcoded to target http://localhost because:
             // - the requests are always from the local machine (we're not accepting remote
             //   requests that go directly to the Vue CLI middleware server)
@@ -60,13 +60,13 @@ namespace Microsoft.AspNetCore.SpaServices.VueCli
         }
 
         private static async Task<VueCliServerInfo> StartVueCliServerAsync(
-            string sourcePath, string scriptName, string pkgManagerCommand, ILogger logger)
+            string sourcePath, string scriptName, ILogger logger)
         {
             var portNumber = TcpPortFinder.FindAvailablePort();
             logger.LogInformation($"Starting @vue/cli on port {portNumber}...");
 
-            var scriptRunner = new NodeScriptRunner(
-                sourcePath, scriptName, $"--port {portNumber}", null, pkgManagerCommand);
+            var scriptRunner = new NpmScriptRunner(
+                sourcePath, scriptName, $"--port {portNumber}", null);
             scriptRunner.AttachToLogger(logger);
 
             Match openBrowserLine;
@@ -80,7 +80,7 @@ namespace Microsoft.AspNetCore.SpaServices.VueCli
                 catch (EndOfStreamException ex)
                 {
                     throw new InvalidOperationException(
-                        $"The {pkgManagerCommand} script '{scriptName}' exited without indicating that the " +
+                        $"The NPM script '{scriptName}' exited without indicating that the " +
                         $"Vue CLI was listening for requests. The error output was: " +
                         $"{stdErrReader.ReadAsString()}", ex);
                 }
